@@ -1,2 +1,2 @@
 # calyvim
-Open source Python based MVC framework.
+Open source Invoice Manager.

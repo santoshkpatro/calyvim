@@ -17,7 +17,7 @@ var generateCmd = &cobra.Command{
 		name := args[0]
 		timestamp := time.Now().Format("20060102150405")
 
-		migrationFile := filepath.Join("migrations", fmt.Sprintf("%s_%s.sql", timestamp, name))
+		migrationFile := filepath.Join("internal", "db", "migrations", fmt.Sprintf("%s_%s.sql", timestamp, name))
 
 		if err := os.MkdirAll("migrations", os.ModePerm); err != nil {
 			fmt.Printf("Failed to create migrations folder: %v\n", err)

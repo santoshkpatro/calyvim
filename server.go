@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/santoshkpatro/calyvim/cmd"
 	"github.com/santoshkpatro/calyvim/internal/route"
 )
@@ -18,11 +19,16 @@ func main() {
 
 	e := echo.New()
 
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}\n",
+	}))
+
 	e.GET("/up", func(c echo.Context) error {
 		return c.String(http.StatusOK, "All good!")
 	})
 
-	route.RegisterAuthRoute(e)
+	route.RegisterAuthRoutes(e)
+	route.RegisterInvoiceRoutes(e)
 
 	e.Logger.Fatal(e.Start(":8000"))
 }

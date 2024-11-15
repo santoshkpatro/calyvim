@@ -35,7 +35,7 @@ var migrateCmd = &cobra.Command{
 		}
 
 		// Define the migrations folder path
-		migrationsFolder := "migrations"
+		migrationsFolder := "internal/db/migrations"
 
 		// Read migrations files from the migrations folder
 		files, err := os.ReadDir(migrationsFolder)
