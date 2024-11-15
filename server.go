@@ -30,5 +30,11 @@ func main() {
 	route.RegisterAuthRoutes(e)
 	route.RegisterInvoiceRoutes(e)
 
+	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+		Root:   "dist",
+		Browse: false,
+		HTML5:  true,
+	}))
+
 	e.Logger.Fatal(e.Start(":8000"))
 }
