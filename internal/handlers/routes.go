@@ -17,6 +17,7 @@ func (h *HandlerContext) RegisterRoutes(e *echo.Echo) {
 
     // Auth routes
     api.GET("/login", h.Login)
+    api.POST("/register", h.Register    )
 
     // Health check route
     api.GET("/health", h.HealthCheck)
