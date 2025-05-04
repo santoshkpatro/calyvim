@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"net/http"
+	"calyvim/internal/middlewares"
 
 	"github.com/labstack/echo/v4"
 )
@@ -9,15 +9,18 @@ import (
 func (h *HandlerContext) RegisterRoutes(e *echo.Echo) {
 	api := e.Group("/api")
 
-	// Base health and root check
-	api.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Welcome to Calyvim API")
-	})
+	// Public routes (unauthenticated)
+	public := api.Group("")
+
+	// Protected routes (authenticated)
+	auth := api.Group("")
+	auth.Use(middlewares.CookieAuthMiddleware) // Or JWT, etc.
 
 	// Auth routes
-	api.GET("/login", h.Login)
-	api.POST("/register", h.Register)
+	public.POST("/login", h.Login)
+	public.POST("/register", h.Register)
+	auth.GET("/profile", h.Profile)
 
 	// Health check route
-	api.GET("/health", h.HealthCheck)
+	public.GET("/health", h.HealthCheck)
 }

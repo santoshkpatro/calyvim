@@ -1,9 +1,13 @@
 package handlers
 
 import (
+	"calyvim/internal/models"
+	"calyvim/internal/utils"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,22 +19,52 @@ type RegisterRequest struct {
 	LastName  string `json:"lastName"`
 }
 
-func (h *HandlerContext) Login(c echo.Context) error {
-	// Dummy credentials (in real case, you'd parse JSON or form input)
-	username := c.QueryParam("username")
-	password := c.QueryParam("password")
+type LoginRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
 
-	// Dummy validation
-	if username == "admin" && password == "secret" {
-		return c.JSON(http.StatusOK, map[string]string{
-			"message": "Login successful",
-			"token":   "dummy-jwt-token",
-		})
+var validate = validator.New()
+
+func (h *HandlerContext) Login(c echo.Context) error {
+	var req LoginRequest
+	if err := c.Bind(&req); err != nil {
+		return utils.ResponseError(c, http.StatusBadRequest, "Invalid Request", err)
 	}
 
-	return c.JSON(http.StatusUnauthorized, map[string]string{
-		"error": "invalid credentials",
-	})
+	if err := validate.Struct(req); err != nil {
+		return utils.ResponseError(c, http.StatusBadRequest, "Validation error", err)
+	}
+
+	var storedHash string
+	err := h.DB.Get(&storedHash, "SELECT password_hash FROM users WHERE email = $1", req.Email)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
+	}
+
+	// Compare password
+	if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(req.Password)); err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
+	}
+
+	userData := models.User{}
+	err = h.DB.Get(&userData, "SELECT id, email, first_name, last_name, is_active FROM users WHERE email=$1", req.Email)
+	if err != nil {
+		return utils.ResponseError(c, http.StatusBadGateway, "Something wen't wrong", err)
+	}
+
+	// Set cookie
+	cookie := new(http.Cookie)
+	cookie.Name = "session_id"
+	cookie.Value = userData.ID.String()
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.Secure = false // Set to true in production with HTTPS
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+
+	c.SetCookie(cookie)
+
+	return utils.ResponseOK(c, userData, "Login Successfull")
 }
 
 func (h *HandlerContext) Register(c echo.Context) error {
@@ -72,4 +106,16 @@ func (h *HandlerContext) Register(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, map[string]string{"message": "User registered successfully"})
+}
+
+func (h *HandlerContext) Profile(c echo.Context) error {
+	userID := c.Get("user_id").(string)
+
+	var user models.User
+	err := h.DB.Get(&user, "SELECT id, email, first_name, last_name, is_active FROM users WHERE id = $1", userID)
+	if err != nil {
+		return utils.ResponseError(c, http.StatusBadGateway, "Something wen't wrong", err)
+	}
+
+	return utils.ResponseOK(c, user, "Profile fetched successfully")
 }
