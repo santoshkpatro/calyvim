@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"calyvim/internal/models"
+	"calyvim/internal/serializer"
 	"calyvim/internal/utils"
 	"net/http"
 	"strings"
@@ -48,7 +49,7 @@ func (h *HandlerContext) Login(c echo.Context) error {
 	}
 
 	userData := models.User{}
-	err = h.DB.Get(&userData, "SELECT id, email, first_name, last_name, is_active FROM users WHERE email=$1", req.Email)
+	err = h.DB.Get(&userData, "SELECT * FROM users WHERE email=$1", req.Email)
 	if err != nil {
 		return utils.ResponseError(c, http.StatusBadGateway, "Something wen't wrong", err)
 	}
@@ -64,7 +65,7 @@ func (h *HandlerContext) Login(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	return utils.ResponseOK(c, userData, "Login Successfull")
+	return utils.ResponseOK(c, serializer.UserSerializer(userData), "Login Successfull")
 }
 
 func (h *HandlerContext) Register(c echo.Context) error {
