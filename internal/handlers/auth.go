@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"calyvim/internal/models"
-	"calyvim/internal/serializer"
 	"calyvim/internal/utils"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -14,9 +12,9 @@ import (
 )
 
 type RegisterRequest struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	FirstName string `json:"firstName"`
+	Email     string `json:"email" validate:"required,email"`
+	Password  string `json:"password" validate:"required"`
+	FirstName string `json:"firstName" validate:"required"`
 	LastName  string `json:"lastName"`
 }
 
@@ -65,7 +63,7 @@ func (h *HandlerContext) Login(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	return utils.ResponseOK(c, serializer.UserSerializer(userData), "Login Successfull")
+	return utils.ResponseOK(c, userData.Serialized(), "Login Successfull")
 }
 
 func (h *HandlerContext) Register(c echo.Context) error {
@@ -74,26 +72,23 @@ func (h *HandlerContext) Register(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
 	}
 
-	req.Email = strings.TrimSpace(req.Email)
-	req.Password = strings.TrimSpace(req.Password)
-
-	if req.Email == "" || req.Password == "" || req.FirstName == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Email and password and First Name are required"})
+	if err := validate.Struct(req); err != nil {
+		return utils.ResponseError(c, http.StatusBadRequest, "Validation error", err)
 	}
 
 	var count int
 	err := h.DB.Get(&count, "SELECT COUNT(1) FROM users WHERE email = $1", req.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Database error"})
+		return utils.ResponseError(c, http.StatusBadGateway, "Something wen't wrong!", err)
 	}
 	if count > 0 {
-		return c.JSON(http.StatusConflict, map[string]string{"error": "Email already registered"})
+		return utils.ResponseError(c, http.StatusConflict, "An account already exist's with the give email address", nil)
 	}
 
 	// Hash the password
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to hash password"})
+		return utils.ResponseError(c, http.StatusBadGateway, "Something wen't wrong!", err)
 	}
 
 	// Insert the user
@@ -103,10 +98,10 @@ func (h *HandlerContext) Register(c echo.Context) error {
     `, req.Email, string(hash), req.FirstName, req.LastName)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to register user"})
+		return utils.ResponseError(c, http.StatusBadGateway, "Something wen't wrong!", err)
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"message": "User registered successfully"})
+	return utils.ResponseOK(c, nil, "Account created successfully")
 }
 
 func (h *HandlerContext) Profile(c echo.Context) error {
