@@ -1,7 +1,11 @@
 package handlers
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
+)
 
 type HandlerContext struct {
-    DB *sqlx.DB
+	DB    *sqlx.DB
+	Cache *redis.Client
 }

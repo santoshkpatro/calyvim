@@ -9,42 +9,44 @@ import (
 )
 
 type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
-func (h *HandlerContext) Login (c echo.Context) error {
+func (h *HandlerContext) Login(c echo.Context) error {
 	// Dummy credentials (in real case, you'd parse JSON or form input)
-    username := c.QueryParam("username")
-    password := c.QueryParam("password")
+	username := c.QueryParam("username")
+	password := c.QueryParam("password")
 
-    // Dummy validation
-    if username == "admin" && password == "secret" {
-        return c.JSON(http.StatusOK, map[string]string{
-            "message": "Login successful",
-            "token":   "dummy-jwt-token",
-        })
-    }
+	// Dummy validation
+	if username == "admin" && password == "secret" {
+		return c.JSON(http.StatusOK, map[string]string{
+			"message": "Login successful",
+			"token":   "dummy-jwt-token",
+		})
+	}
 
-    return c.JSON(http.StatusUnauthorized, map[string]string{
-        "error": "invalid credentials",
-    })
+	return c.JSON(http.StatusUnauthorized, map[string]string{
+		"error": "invalid credentials",
+	})
 }
 
-func (h *HandlerContext) Register (c echo.Context) error {
-    var req RegisterRequest
-    if err := c.Bind(&req); err != nil {
+func (h *HandlerContext) Register(c echo.Context) error {
+	var req RegisterRequest
+	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
 	}
 
-    req.Email = strings.TrimSpace(req.Email)
+	req.Email = strings.TrimSpace(req.Email)
 	req.Password = strings.TrimSpace(req.Password)
 
-    if req.Email == "" || req.Password == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Email and password are required"})
+	if req.Email == "" || req.Password == "" || req.FirstName == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Email and password and First Name are required"})
 	}
 
-    var count int
+	var count int
 	err := h.DB.Get(&count, "SELECT COUNT(1) FROM users WHERE email = $1", req.Email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Database error"})
@@ -53,21 +55,21 @@ func (h *HandlerContext) Register (c echo.Context) error {
 		return c.JSON(http.StatusConflict, map[string]string{"error": "Email already registered"})
 	}
 
-    // Hash the password
+	// Hash the password
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to hash password"})
 	}
 
-    // Insert the user
+	// Insert the user
 	_, err = h.DB.Exec(`
-    INSERT INTO users (email, password_hash)
-    VALUES ($1, $2)
-    `, req.Email, string(hash))
+    INSERT INTO users (email, password_hash, first_name, last_name)
+    VALUES ($1, $2, $3, $4)
+    `, req.Email, string(hash), req.FirstName, req.LastName)
 
-    if err != nil {
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to register user"})
 	}
 
-    return c.JSON(http.StatusCreated, map[string]string{"message": "User registered successfully"})
+	return c.JSON(http.StatusCreated, map[string]string{"message": "User registered successfully"})
 }
