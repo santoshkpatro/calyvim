@@ -19,7 +19,7 @@ type User struct {
 	UpdatedAt    time.Time    `db:"updated_at"`
 }
 
-type serializer struct {
+type userSerializer struct {
 	ID         uuid.UUID `json:"id"`
 	Email      string    `json:"email"`
 	FirstName  string    `json:"firstName"`
@@ -36,8 +36,8 @@ func (u User) IsVerified() bool {
 	return !u.VerifiedAt.Valid
 }
 
-func (u User) Serialized() serializer {
-	return serializer{
+func (u User) Serialized() userSerializer {
+	return userSerializer{
 		ID:         u.ID,
 		Email:      u.Email,
 		FirstName:  u.FirstName,
