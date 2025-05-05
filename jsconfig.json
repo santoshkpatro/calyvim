@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./web/*"]
-    }
-  },
-  "exclude": ["node_modules", "dist"]
-}
