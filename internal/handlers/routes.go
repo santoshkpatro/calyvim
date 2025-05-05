@@ -23,4 +23,8 @@ func (h *HandlerContext) RegisterRoutes(e *echo.Echo) {
 
 	// Health check route
 	public.GET("/health", h.HealthCheck)
+
+	// Organizations
+	auth.GET("/organizations", h.ListOrganizations)
+	auth.POST("/organizations", h.CreateOrganization)
 }
