@@ -1,5 +1,3 @@
-# calyvim/request.py
-
 from starlette.requests import Request as StarletteRequest
 
 

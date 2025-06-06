@@ -1,5 +1,3 @@
-# calyvim/router.py
-
 import re
 
 

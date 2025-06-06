@@ -18,7 +18,6 @@ def new(name: str = typer.Argument(None)):
     (project_path / "app" / "views" / "home").mkdir(parents=True, exist_ok=True)
     (project_path / "config" / "db").mkdir(parents=True, exist_ok=True)
     (project_path / "public").mkdir(parents=True, exist_ok=True)
-    (project_path / "static").mkdir(parents=True, exist_ok=True)
 
     # urls.py
     (project_path / "urls.py").write_text(
