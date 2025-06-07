@@ -3,18 +3,23 @@ from starlette.responses import PlainTextResponse, JSONResponse
 from starlette.templating import Jinja2Templates
 from starlette.requests import Request as StarletteRequest
 from calyvim.request import Request
+from calyvim.conf import settings
 
 
 class Calyvim:
     def __init__(
         self,
-        router_module: str = "urls",
-        views_path: str = "app.views",
-        controller_path: str = "app.controllers",
+        app_module: str = "app",  # NEW
+        router_module="config.urls",
+        settings_module: str = "config.settings",
     ):
+        self.app_module = app_module
+        self.controller_path = f"{app_module}.controllers"
+        self.views_path = f"{app_module}.views"
+        self.templates = Jinja2Templates(directory=self.views_path.replace(".", "/"))
+
+        settings.configure(settings_module)
         self.router = self._load_router(router_module)
-        self.templates = Jinja2Templates(directory=views_path.replace(".", "/"))
-        self.controller_path = controller_path.replace(".", "/").replace("/", ".")
 
     def _load_router(self, module_name):
         mod = importlib.import_module(module_name)
@@ -32,7 +37,6 @@ class Calyvim:
             return
 
         try:
-            # Import controller dynamically
             module_path = f"{self.controller_path}.{match['controller']}_controller"
             module = importlib.import_module(module_path)
 
