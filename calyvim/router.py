@@ -1,51 +1,70 @@
 import re
+from contextlib import contextmanager
 
 
 class Router:
     def __init__(self):
         self.routes = []
+        self.prefix_stack = [""]  # for scoped nesting
+
+    @contextmanager
+    def scope(self, prefix: str):
+        """Temporarily extend the route prefix for nested routes"""
+        self.prefix_stack.append(self._join(self.prefix_stack[-1], prefix))
+        try:
+            yield
+        finally:
+            self.prefix_stack.pop()
+
+    def _join(self, a, b):
+        return (a.rstrip("/") + "/" + b.lstrip("/")).rstrip("/")
+
+    def _full_path(self, path):
+        return self._join(self.prefix_stack[-1], path)
 
     def get(self, path, to):
-        self._add_route("GET", path, to)
+        self._add_route("GET", self._full_path(path), to)
 
     def post(self, path, to):
-        self._add_route("POST", path, to)
+        self._add_route("POST", self._full_path(path), to)
 
     def put(self, path, to):
-        self._add_route("PUT", path, to)
+        self._add_route("PUT", self._full_path(path), to)
 
     def delete(self, path, to):
-        self._add_route("DELETE", path, to)
+        self._add_route("DELETE", self._full_path(path), to)
 
     def resource(self, name):
-        """Auto-generate RESTful routes for a resource"""
-        self.get(f"/{name}", to=f"{name}#index")
-        self.get(f"/{name}/{{id}}", to=f"{name}#show")
-        self.post(f"/{name}", to=f"{name}#create")
-        self.put(f"/{name}/{{id}}", to=f"{name}#update")
-        self.delete(f"/{name}/{{id}}", to=f"{name}#delete")
+        base = f"/{name}"
+        self.get(base, to=f"{name}#index")
+        self.get(f"{base}/{{id}}", to=f"{name}#show")
+        self.post(base, to=f"{name}#create")
+        self.put(f"{base}/{{id}}", to=f"{name}#update")
+        self.delete(f"{base}/{{id}}", to=f"{name}#delete")
 
     def _add_route(self, method, path, to):
-        controller_name, action = to.split("#")
-        pattern = self._compile_path(path)
+        controller, action = to.split("#")
+        regex = self._compile_path(path)
         self.routes.append(
             {
                 "method": method,
                 "path": path,
-                "regex": pattern,
-                "controller": controller_name,
+                "regex": regex,
+                "controller": controller,
                 "action": action,
             }
         )
 
     def _compile_path(self, path):
-        # Converts /users/{id} to regex pattern
+        param_names = set()
+        for name in re.findall(r"{(\w+)}", path):
+            if name in param_names:
+                raise ValueError(f"Duplicate parameter name: '{name}' in path '{path}'")
+            param_names.add(name)
         return re.compile("^" + re.sub(r"{(\w+)}", r"(?P<\1>[^/]+)", path) + "$")
 
     def resolve(self, path, method):
         format = "html"
-
-        # Detect format via .json or .html suffix
         if path.endswith(".json"):
             path = path[:-5]
             format = "json"
@@ -59,8 +78,7 @@ class Router:
                 return {
                     "controller": route["controller"],
                     "action": route["action"],
-                    "format": format,
                     "params": match.groupdict(),
+                    "format": format,
                 }
-
         return None
