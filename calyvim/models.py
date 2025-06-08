@@ -6,12 +6,16 @@ class QueryBuilder:
     def __init__(self, model_cls):
         self.model_cls = model_cls
         self.conditions = []
+        self._result_cache = None
 
     def where(self, **kwargs):
         self.conditions.append(kwargs)
         return self
 
-    def all(self):
+    def _execute(self):
+        if self._result_cache is not None:
+            return self._result_cache
+
         table = self.model_cls.get_table_name()
         conn = self.model_cls.get_connection()
         conn.row_factory = sqlite3.Row
@@ -33,7 +37,17 @@ class QueryBuilder:
         rows = cursor.fetchall()
         conn.close()
 
-        return [self.model_cls(**dict(row)) for row in rows]
+        self._result_cache = [self.model_cls(**dict(row)) for row in rows]
+        return self._result_cache
+
+    def __iter__(self):
+        return iter(self._execute())
+
+    def __getitem__(self, index):
+        return self._execute()[index]
+
+    def __len__(self):
+        return len(self._execute())
 
 
 class CalyModel:
