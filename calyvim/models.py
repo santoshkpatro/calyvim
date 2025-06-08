@@ -2,6 +2,40 @@ import sqlite3
 from calyvim.conf import settings
 
 
+class QueryBuilder:
+    def __init__(self, model_cls):
+        self.model_cls = model_cls
+        self.conditions = []
+
+    def where(self, **kwargs):
+        self.conditions.append(kwargs)
+        return self
+
+    def all(self):
+        table = self.model_cls.get_table_name()
+        conn = self.model_cls.get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        clauses = []
+        values = []
+
+        for cond in self.conditions:
+            for key, val in cond.items():
+                clauses.append(f"{key} = ?")
+                values.append(val)
+
+        sql = f"SELECT * FROM {table}"
+        if clauses:
+            sql += " WHERE " + " AND ".join(clauses)
+
+        cursor.execute(sql, values)
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self.model_cls(**dict(row)) for row in rows]
+
+
 class CalyModel:
     db_table: str = None
 
@@ -45,6 +79,10 @@ class CalyModel:
         row = cursor.fetchone()
         conn.close()
         return cls(**dict(row)) if row else None
+
+    @classmethod
+    def where(cls, **conditions):
+        return QueryBuilder(cls).where(**conditions)
 
     def save(self):
         table = self.get_table_name()
