@@ -1,2 +1,0 @@
-[tool.poetry.scripts]
-calyvim = "calyvim.cli:app"
