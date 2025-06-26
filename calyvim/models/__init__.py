@@ -6,6 +6,8 @@ from calyvim.models.organization import (
     OrganizationInvite,
 )
 from calyvim.models.team import Team, TeamMember
+from calyvim.models.state import State
+from calyvim.models.issue import Issue, IssueGoal, IssueSnapshot
 
 __all__ = [
     "BaseModel",
@@ -17,4 +19,8 @@ __all__ = [
     "ProjectPermission",
     "Team",
     "TeamMember",
+    "State",
+    "Issue",
+    "IssueGoal",
+    "IssueSnapshot",
 ]

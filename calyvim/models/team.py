@@ -17,8 +17,10 @@ class Team(BaseModel):
         on_delete=models.PROTECT,
         related_name="created_teams",
     )
+    issue_prefix = models.CharField(max_length=16, blank=True)
 
     class Meta:
+        db_table = "teams"
         verbose_name = "Team"
         verbose_name_plural = "Teams"
         ordering = ["name"]
@@ -61,6 +63,7 @@ class TeamMember(BaseModel):
     )
 
     class Meta:
+        db_table = "team_members"
         verbose_name = "Team Member"
         verbose_name_plural = "Team Members"
         ordering = ["team", "user"]
