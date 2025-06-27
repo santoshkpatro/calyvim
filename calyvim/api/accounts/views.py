@@ -5,6 +5,7 @@ from rest_framework import status
 from django.contrib.auth import login
 from django.utils import timezone
 from django.db import transaction
+from django.db.models import OuterRef, Subquery
 
 from calyvim.api.accounts.serializers import (
     LoginSerializer,
@@ -13,7 +14,7 @@ from calyvim.api.accounts.serializers import (
     TeamSerializer,
 )
 from calyvim.utils.response import api_response_template
-from calyvim.models import User, Organization, Team
+from calyvim.models import User, Organization, Team, TeamMember
 
 
 class AccountViewSet(ViewSet):
@@ -111,7 +112,20 @@ class AccountViewSet(ViewSet):
             response_data["result"] = data
             return Response(response_data, status=status.HTTP_200_OK)
 
-        teams = Team.objects.filter(members__user=user).select_related("organization")
+        teams = (
+            Team.objects.filter(members__user=user)
+            .select_related("organization")
+            .annotate(
+                member_role=Subquery(
+                    TeamMember.objects.filter(team=OuterRef("pk"), user=user).values(
+                        "role"
+                    )[:1]
+                )
+            )
+        )
+
+        print("Teams", teams[0].member_role)
+
         logged_in_user_serializer = LoggedInUserSerializer(user)
         team_serializer = TeamSerializer(teams, many=True)
 

@@ -23,10 +23,19 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 class TeamSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(read_only=True)
+    member_role = serializers.CharField(read_only=True)
 
     class Meta:
         model = Team
-        fields = ["id", "name", "bio", "organization_id", "organization", "created_at"]
+        fields = [
+            "id",
+            "name",
+            "bio",
+            "organization_id",
+            "organization",
+            "member_role",
+            "created_at",
+        ]
 
 
 class LoggedInUserSerializer(serializers.ModelSerializer):

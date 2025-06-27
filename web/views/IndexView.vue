@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router'
 const appStore = useAppStore()
 const router = useRouter()
 
-onMounted(() => {
+onMounted(async () => {
   const team = appStore.teams[0]
   if (team) {
     router.push({ name: 'home', params: { teamId: team.id } })
@@ -14,4 +14,6 @@ onMounted(() => {
 })
 </script>
 
-<template></template>
+<template>
+  <div></div>
+</template>
