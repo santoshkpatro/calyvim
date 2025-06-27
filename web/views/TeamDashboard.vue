@@ -14,14 +14,20 @@ import {
   Bug,
   Activity,
   CalendarDays,
+  Layers,
+  ArrowRight,
+  ChevronRight,
 } from 'lucide-vue-next'
 
+import { ref, computed } from 'vue'
 import { RouterView, useRoute, RouterLink } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import TeamSwitcher from '@/components/TeamSwitcher.vue'
 
 const route = useRoute()
 const appStore = useAppStore()
+
+const currentTeam = computed(() => appStore.teams.find((t) => t.id === route.params.teamId))
 
 const menuItems = [
   { name: 'Home', icon: LayoutDashboard, color: 'text-violet-600', routePath: '' },
@@ -68,6 +74,26 @@ const rightSidebarItems = [
     external: true,
   },
 ]
+
+const breadcrumps = ref([
+  {
+    icon: Layers,
+    name: currentTeam.value.name,
+    route: `/team/${route.params.teamId}/`,
+  },
+])
+
+const updateBreadcrumps = (crumps) => {
+  // TODO; Always have deafultBreadcrump as first item
+  breadcrumps.value = [
+    {
+      icon: Layers,
+      name: currentTeam.value.name,
+      route: `/team/${route.params.teamId}/`,
+    },
+    ...crumps,
+  ]
+}
 </script>
 
 <template>
@@ -78,7 +104,7 @@ const rightSidebarItems = [
     >
       <div>
         <!-- Team Switcher (no extra top margin) -->
-        <div class="px-2 py-1 text-sm text-gray-900 font-semibold">
+        <div class="px-2 py-1 text-sm text-gray-900 font-semibold cursor-pointer">
           <TeamSwitcher :teamId="route.params.teamId" />
         </div>
 
@@ -110,10 +136,17 @@ const rightSidebarItems = [
       >
         <!-- Breadcrumb -->
         <div class="flex items-center space-x-2 text-sm text-gray-700 font-medium">
-          <LayoutDashboard class="w-4 h-4 text-gray-500" />
-          <span>Dashboard</span>
-          <span>/</span>
-          <span class="text-gray-900">Current Page</span>
+          <div
+            class="flex items-center space-x-1"
+            v-for="(crumb, index) in breadcrumps"
+            :key="index"
+          >
+            <component :is="crumb.icon" class="w-4 h-4 text-gray-500" />
+            <RouterLink :to="crumb.route" class="hover:underline text-gray-800 no-underline">
+              {{ crumb.name }}
+            </RouterLink>
+            <ChevronRight v-if="index < breadcrumps.length - 1" class="w-4 h-4" />
+          </div>
         </div>
 
         <!-- Search and Profile -->
@@ -139,7 +172,7 @@ const rightSidebarItems = [
 
       <!-- Scrollable Content -->
       <div class="flex-1 overflow-auto px-6 py-5 bg-[#F3F4EF]">
-        <RouterView />
+        <RouterView @update-breadcrumps="updateBreadcrumps" />
       </div>
     </div>
 
