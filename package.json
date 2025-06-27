@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
+    "@dicebear/collection": "^9.2.3",
+    "@dicebear/core": "^9.2.3",
     "@tailwindcss/vite": "^4.1.11",
     "ant-design-vue": "~4.2.6",
     "axios": "^1.10.0",

@@ -23,6 +23,7 @@ import { RouterView, useRoute, RouterLink } from 'vue-router'
 import { getTeamDetailsAPI } from '@/api'
 import { useAppStore } from '@/stores/app'
 import TeamSwitcher from '@/components/TeamSwitcher.vue'
+import { teamAvatar } from '@/utils/images'
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -145,8 +146,13 @@ watch(() => route.params.teamId, loadTeamDetails, { immediate: true })
           <!-- Breadcrumb -->
           <div class="flex items-center space-x-2 text-sm text-gray-700 font-medium">
             <div class="flex items-center space-x-1">
-              <Layers class="w-4 h-4 text-gray-500" />
-              <span>{{ currentTeam.name }}</span>
+              <a-avatar
+                :src="teamAvatar(currentTeam.name)"
+                :alt="currentTeam.name"
+                shape="square"
+                :size="20"
+              />
+              <span class="ml-1">{{ currentTeam.name }}</span>
               <ChevronRight class="w-4 h-4" />
             </div>
             <div
