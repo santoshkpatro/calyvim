@@ -2,6 +2,7 @@ import secrets
 from django.db import models
 from django.utils import timezone
 from calyvim.models.common import BaseModel
+from calyvim.models.fallbacks import get_anonymous_user
 
 
 class Organization(BaseModel):
@@ -11,7 +12,7 @@ class Organization(BaseModel):
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(
         "User",
-        on_delete=models.PROTECT,
+        on_delete=models.SET(get_anonymous_user),
         related_name="created_organizations",
     )
 
@@ -49,7 +50,7 @@ class OrganizationMember(BaseModel):
     confirmed_at = models.DateTimeField(null=True, blank=True)
     invited_by = models.ForeignKey(
         "User",
-        on_delete=models.PROTECT,
+        on_delete=models.SET(get_anonymous_user),
         related_name="invited_members",
         blank=True,
         null=True,
@@ -78,7 +79,7 @@ class OrganizationInvite(BaseModel):
     role = models.CharField(max_length=32, choices=OrganizationMember.Role.choices)
     invited_by = models.ForeignKey(
         "User",
-        on_delete=models.PROTECT,
+        on_delete=models.SET(get_anonymous_user),
         related_name="organization_invites",
     )
     token = models.CharField(max_length=64, unique=True)

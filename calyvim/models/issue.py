@@ -1,6 +1,7 @@
 from django.db import models
 
 from calyvim.models.common import BaseModel
+from calyvim.models.fallbacks import get_anonymous_user
 
 
 class Issue(BaseModel):
@@ -44,7 +45,7 @@ class Issue(BaseModel):
     sequence = models.FloatField(default=50000)
     created_by = models.ForeignKey(
         "User",
-        on_delete=models.PROTECT,
+        on_delete=models.SET(get_anonymous_user),
         related_name="created_issues",
     )
     due_date = models.DateField(blank=True, null=True)
@@ -87,7 +88,7 @@ class IssueGoal(BaseModel):
     )
     reviewed_by = models.ForeignKey(
         "User",
-        on_delete=models.PROTECT,
+        on_delete=models.SET(get_anonymous_user),
         related_name="reviewed_goal_issues",
     )
     reviewed_at = models.DateTimeField(blank=True, null=True)

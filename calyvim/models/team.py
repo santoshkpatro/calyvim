@@ -1,6 +1,7 @@
 from django.db import models
 
 from calyvim.models.common import BaseModel
+from calyvim.models.fallbacks import get_anonymous_user
 
 
 class Team(BaseModel):
@@ -14,7 +15,7 @@ class Team(BaseModel):
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(
         "User",
-        on_delete=models.PROTECT,
+        on_delete=models.SET(get_anonymous_user),
         related_name="created_teams",
     )
     issue_prefix = models.CharField(max_length=16, blank=True)

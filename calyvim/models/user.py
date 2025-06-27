@@ -39,6 +39,7 @@ class User(AbstractBaseUser, BaseModel):
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
 
     is_admin = models.BooleanField(default=False)
+    is_anonymous = models.BooleanField(default=False)
     date_joined = models.DateTimeField(blank=True, null=True)
 
     USERNAME_FIELD = "email"
@@ -60,7 +61,7 @@ class User(AbstractBaseUser, BaseModel):
     def save(self, *args, **kwargs):
         if self._state.adding:
             if not self.username:
-                self.username = self.generate_username()
+                self.username = self.email.split("@")[0]
             if not self.display_name:
                 self.display_name = self.full_name or self.username
         return super().save(*args, **kwargs)
