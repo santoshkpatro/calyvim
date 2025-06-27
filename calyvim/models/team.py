@@ -20,6 +20,12 @@ class Team(BaseModel):
     )
     issue_prefix = models.CharField(max_length=16, blank=True)
 
+    users = models.ManyToManyField(
+        "User",
+        through="TeamMember",
+        related_name="teams",
+    )
+
     class Meta:
         db_table = "teams"
         verbose_name = "Team"

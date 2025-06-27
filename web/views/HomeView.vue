@@ -1,9 +1,8 @@
-<script setup>
-import TheWelcome from '../components/TheWelcome.vue'
-</script>
+<script setup></script>
 
 <template>
-  <main>
-    <TheWelcome />
+  <main style="margin-left: 20px">
+    <div>Hello</div>
+    <a-button type="primary">Hello</a-button>
   </main>
 </template>

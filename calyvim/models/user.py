@@ -1,11 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 
 from calyvim.models.common import BaseModel
 
 
-class UserManager(models.Manager):
+class UserManager(BaseUserManager):
     def create_superuser(self, email, full_name, password=None):
         today = timezone.now()
         user = self.model(
@@ -38,6 +38,7 @@ class User(AbstractBaseUser, BaseModel):
     last_login_at = models.DateTimeField(null=True, blank=True)
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
 
+    is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_anonymous = models.BooleanField(default=False)
     date_joined = models.DateTimeField(blank=True, null=True)

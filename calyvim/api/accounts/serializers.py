@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from calyvim.models.user import User
+from calyvim.models import User, Team, Organization
 
 
 class LoginSerializer(serializers.Serializer):
@@ -13,6 +13,20 @@ class RegisterSerializer(serializers.Serializer):
     full_name = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
     organization = serializers.CharField(required=True)
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ["id", "name", "description", "created_at"]
+
+
+class TeamSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer(read_only=True)
+
+    class Meta:
+        model = Team
+        fields = ["id", "name", "bio", "organization_id", "organization", "created_at"]
 
 
 class LoggedInUserSerializer(serializers.ModelSerializer):

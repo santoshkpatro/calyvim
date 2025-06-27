@@ -10,6 +10,7 @@ from calyvim.api.accounts.serializers import (
     LoginSerializer,
     LoggedInUserSerializer,
     RegisterSerializer,
+    TeamSerializer,
 )
 from calyvim.utils.response import api_response_template
 from calyvim.models import User, Organization, Team
@@ -103,12 +104,21 @@ class AccountViewSet(ViewSet):
     def me(self, request, *args, **kwargs):
         response_data = api_response_template()
         user = request.user
+        data = {"is_authenticated": False, "user": None}
 
         if not user.is_authenticated:
             response_data["detail"] = "User not authenticated"
-            response_data["error"] = "not_authenticated"
-            return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
+            response_data["result"] = data
+            return Response(response_data, status=status.HTTP_200_OK)
 
+        teams = Team.objects.filter(members__user=user).select_related("organization")
         logged_in_user_serializer = LoggedInUserSerializer(user)
-        response_data["result"] = logged_in_user_serializer.data
+        team_serializer = TeamSerializer(teams, many=True)
+
+        data["is_authenticated"] = True
+        data["user"] = logged_in_user_serializer.data
+        data["teams"] = team_serializer.data
+
+        response_data["result"] = data
+        response_data["detail"] = "User is logged in"
         return Response(response_data, status=status.HTTP_200_OK)
