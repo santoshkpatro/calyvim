@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
+
+import TeamDashboard from '@/views/TeamDashboard.vue'
+import IndexView from '@/views/IndexView.vue'
 
 import { useAppStore } from '@/stores/app'
 
@@ -8,8 +10,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'index',
+      component: IndexView,
       meta: {
         requiresAuth: true,
       },
@@ -26,6 +28,20 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
+    },
+    {
+      path: '/team/:teamId',
+      component: TeamDashboard,
+      meta: {
+        requiresAuth: true,
+      },
+      children: [
+        {
+          path: '',
+          name: 'home',
+          component: () => import('@/views/team/HomeView.vue'),
+        },
+      ],
     },
   ],
 })

@@ -5,7 +5,7 @@ export async function checkAuthStatus() {
     const { data } = await axios.get('/api/accounts/me')
 
     if (data.result.isAuthenticated) {
-      return data.result.user
+      return data.result
     }
 
     return null

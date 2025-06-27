@@ -13,9 +13,10 @@ async function init() {
   app.use(createPinia())
 
   const appStore = useAppStore()
-  const user = await checkAuthStatus()
-  if (user) {
-    appStore.setUser(user)
+  const data = await checkAuthStatus()
+  if (data) {
+    appStore.setUser(data.user)
+    appStore.setTeams(data.teams)
   } else {
     appStore.clear()
   }
