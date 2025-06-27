@@ -15,6 +15,7 @@ class State(BaseModel):
         max_length=16, choices=Status.choices, default=Status.OPEN
     )
     sequence = models.FloatField(default=10000)
+    color = models.CharField(max_length=7, default="#111111")
 
     class Meta:
         db_table = "states"

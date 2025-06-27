@@ -52,7 +52,10 @@ function createNewTeam() {
       class="ant-dropdown-link flex items-center space-x-1 !text-gray-900 hover:!text-black hover:!bg-[#D6D9D1] px-1.5 py-1 rounded-md transition-colors"
       @click.prevent
     >
-      <span class="font-semibold truncate">{{ currentTeam?.name }}</span>
+      <div class="flex flex-col items-start">
+        <span class="text-xs text-gray-500 font-normal leading-tight">Team</span>
+        <span class="font-semibold truncate leading-tight">{{ currentTeam?.name }}</span>
+      </div>
       <ChevronDown class="w-4 h-4" />
     </a>
 
@@ -69,7 +72,7 @@ function createNewTeam() {
         />
 
         <!-- Label -->
-        <div class="text-xs font-medium text-gray-500 px-1">Teams</div>
+        <div class="text-xs font-medium text-gray-500 px-1">Your teams</div>
 
         <!-- Team list -->
         <div class="max-h-60 overflow-y-auto space-y-1">

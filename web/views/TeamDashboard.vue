@@ -50,7 +50,7 @@ const rightSidebarItems = [
     external: true,
   },
   {
-    name: 'Help',
+    name: 'Help & Support',
     icon: LifeBuoy,
     href: 'https://calyvim.com/docs',
     external: true,
@@ -62,7 +62,7 @@ const rightSidebarItems = [
     external: true,
   },
   {
-    name: 'Star',
+    name: 'Star us on GitHub',
     icon: Star,
     href: 'https://github.com/santoshkpatro/calyvim',
     external: true,
@@ -108,7 +108,7 @@ watch(() => route.params.teamId, loadTeamDetails, { immediate: true })
     >
       <div>
         <!-- Team Switcher (no extra top margin) -->
-        <div class="px-2 py-1 text-sm text-gray-900 font-semibold cursor-pointer">
+        <div class="py-1 text-sm text-gray-900 font-semibold cursor-pointer">
           <TeamSwitcher :teamId="route.params.teamId" />
         </div>
 
@@ -136,67 +136,70 @@ watch(() => route.params.teamId, loadTeamDetails, { immediate: true })
     </aside>
 
     <!-- Center Content Area -->
-    <div class="flex-1 flex flex-col overflow-hidden border-r border-gray-300" v-if="!!currentTeam">
-      <!-- Top Bar -->
-      <div
-        class="flex items-center justify-between bg-[#E4E7DF] px-6 py-3 border-b border-gray-300"
-      >
-        <!-- Breadcrumb -->
-        <div class="flex items-center space-x-2 text-sm text-gray-700 font-medium">
-          <div class="flex items-center space-x-1">
-            <Layers class="w-4 h-4 text-gray-500" />
-            <span>{{ currentTeam.name }}</span>
-            <ChevronRight class="w-4 h-4" />
+    <div class="flex-1 flex flex-col overflow-hidden border-r border-gray-300">
+      <template v-if="!!currentTeam">
+        <!-- Top Bar -->
+        <div
+          class="flex items-center justify-between bg-[#E4E7DF] px-6 py-3 border-b border-gray-300"
+        >
+          <!-- Breadcrumb -->
+          <div class="flex items-center space-x-2 text-sm text-gray-700 font-medium">
+            <div class="flex items-center space-x-1">
+              <Layers class="w-4 h-4 text-gray-500" />
+              <span>{{ currentTeam.name }}</span>
+              <ChevronRight class="w-4 h-4" />
+            </div>
+            <div
+              class="flex items-center space-x-1"
+              v-for="(crumb, index) in breadcrumps"
+              :key="index"
+            >
+              <component :is="crumb.icon" class="w-4 h-4 text-gray-500" />
+              <RouterLink :to="crumb.route" class="hover:underline text-gray-800 no-underline">
+                {{ crumb.name }}
+              </RouterLink>
+              <ChevronRight v-if="index < breadcrumps.length - 1" class="w-4 h-4" />
+            </div>
           </div>
-          <div
-            class="flex items-center space-x-1"
-            v-for="(crumb, index) in breadcrumps"
-            :key="index"
-          >
-            <component :is="crumb.icon" class="w-4 h-4 text-gray-500" />
-            <RouterLink :to="crumb.route" class="hover:underline text-gray-800 no-underline">
-              {{ crumb.name }}
-            </RouterLink>
-            <ChevronRight v-if="index < breadcrumps.length - 1" class="w-4 h-4" />
+
+          <!-- Search and Profile -->
+          <div class="flex items-center space-x-4">
+            <a-input-search placeholder="Search" class="!w-48 !rounded !bg-[#E4E7DF]" allow-clear />
+
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-800 font-semibold"
+              >
+                S
+              </div>
+              <div
+                class="hidden lg:block leading-tight text-xs text-right"
+                v-if="appStore.isLoggedIn"
+              >
+                <div class="text-gray-900 font-medium">{{ appStore.user.displayName }}</div>
+                <div class="text-gray-600">{{ appStore.user.email }}</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Search and Profile -->
-        <div class="flex items-center space-x-4">
-          <a-input-search placeholder="Search" class="!w-48 !rounded !bg-[#E4E7DF]" allow-clear />
-
-          <div class="flex items-center space-x-2">
-            <div
-              class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-800 font-semibold"
-            >
-              S
-            </div>
-            <div
-              class="hidden lg:block leading-tight text-xs text-right"
-              v-if="appStore.isLoggedIn"
-            >
-              <div class="text-gray-900 font-medium">{{ appStore.user.displayName }}</div>
-              <div class="text-gray-600">{{ appStore.user.email }}</div>
-            </div>
-          </div>
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-auto px-6 py-5 bg-[#F3F4EF]">
+          <RouterView
+            @update-breadcrumps="updateBreadcrumps"
+            @activate-tab="(tab) => (selectedTab = tab)"
+          />
         </div>
-      </div>
-
-      <!-- Scrollable Content -->
-      <div class="flex-1 overflow-auto px-6 py-5 bg-[#F3F4EF]">
-        <RouterView
-          @update-breadcrumps="updateBreadcrumps"
-          @activate-tab="(tab) => (selectedTab = tab)"
-        />
-      </div>
-    </div>
-
-    <div v-else>
-      <div>Loading ...</div>
+      </template>
+      <template v-else>
+        <div class="flex items-center justify-center h-full text-gray-500">
+          Loading team details...
+        </div>
+      </template>
     </div>
 
     <!-- Right Mini Sidebar -->
-    <aside class="w-12 bg-[#E4E7DF] border-l border-gray-300 flex flex-col items-center py-4">
+    <aside class="w-10 bg-[#E4E7DF] border-l border-gray-300 flex flex-col items-center py-4">
       <div class="flex flex-col items-center space-y-8 flex-1 justify-center">
         <template v-for="item in rightSidebarItems" :key="item.name">
           <a
