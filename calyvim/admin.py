@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
-from calyvim.models import User
+from calyvim.models import User, Organization, Team, TeamMember, OrganizationMember
 
 
 class UserCreationForm(forms.ModelForm):
@@ -80,6 +80,30 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ["email"]
     ordering = ["email"]
     filter_horizontal = []
+
+
+class OrganizationMemberInline(admin.TabularInline):
+    model = OrganizationMember
+    extra = 1
+
+
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
+    list_display = ("name", "description", "created_at")
+    search_fields = ("name",)
+    inlines = [OrganizationMemberInline]
+
+
+class TeamMemberInline(admin.TabularInline):
+    model = TeamMember
+    extra = 1
+
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ("name", "organization", "created_at")
+    search_fields = ("name",)
+    inlines = [TeamMemberInline]
 
 
 # Now register the new UserAdmin...

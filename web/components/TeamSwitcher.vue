@@ -20,9 +20,16 @@ const teamSearch = ref('')
 
 const currentTeam = computed(() => appStore.teams.find((t) => t.id === props.teamId))
 
-const filteredTeams = computed(() =>
-  appStore.teams.filter((t) => t.name.toLowerCase().includes(teamSearch.value.toLowerCase())),
-)
+const filteredTeams = computed(() => {
+  const search = teamSearch.value.toLowerCase()
+
+  const all = appStore.teams
+  const current = all.find((t) => t.id === props.teamId)
+  const matches = all.filter((t) => t.name.toLowerCase().includes(search) && t.id !== props.teamId)
+
+  // If current team exists and matches search or not — keep it first
+  return current ? [current, ...matches] : matches
+})
 
 function selectTeam(team) {
   if (team.id !== props.teamId) {
