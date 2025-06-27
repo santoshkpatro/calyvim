@@ -15,19 +15,19 @@ import {
   Activity,
   CalendarDays,
   Layers,
-  ArrowRight,
   ChevronRight,
 } from 'lucide-vue-next'
-
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { RouterView, useRoute, RouterLink } from 'vue-router'
+
+import { getTeamDetailsAPI } from '@/api'
 import { useAppStore } from '@/stores/app'
 import TeamSwitcher from '@/components/TeamSwitcher.vue'
 
 const route = useRoute()
 const appStore = useAppStore()
 
-const currentTeam = computed(() => appStore.teams.find((t) => t.id === route.params.teamId))
+const currentTeam = ref(null)
 
 const menuItems = [
   { name: 'Home', icon: LayoutDashboard, color: 'text-violet-600', routePath: '' },
@@ -75,25 +75,29 @@ const rightSidebarItems = [
   },
 ]
 
-const breadcrumps = ref([
-  {
-    icon: Layers,
-    name: currentTeam.value.name,
-    route: `/team/${route.params.teamId}/`,
-  },
-])
+const breadcrumps = ref([])
+const selectedTab = ref('home')
 
 const updateBreadcrumps = (crumps) => {
   // TODO; Always have deafultBreadcrump as first item
-  breadcrumps.value = [
-    {
-      icon: Layers,
-      name: currentTeam.value.name,
-      route: `/team/${route.params.teamId}/`,
-    },
-    ...crumps,
-  ]
+  breadcrumps.value = crumps
 }
+
+const loadTeamDetails = async () => {
+  try {
+    const { data } = await getTeamDetailsAPI(route.params.teamId)
+    currentTeam.value = data.result
+  } catch (error) {
+    console.error('Failed to load team details:', error)
+    // Optionally handle the error, e.g., show a notification or redirect
+  }
+}
+
+onMounted(async () => {
+  loadTeamDetails()
+})
+
+watch(() => route.params.teamId, loadTeamDetails, { immediate: true })
 </script>
 
 <template>
@@ -114,6 +118,9 @@ const updateBreadcrumps = (crumps) => {
             <RouterLink
               :to="`/team/${route.params.teamId}/${item.routePath}`"
               class="flex items-center space-x-2 px-2 py-1 rounded-md cursor-pointer hover:bg-[#D8DBD3] no-underline"
+              :class="{
+                'bg-[#D8DBD3] font-semibold no-underline': selectedTab === item.name,
+              }"
             >
               <component :is="item.icon" class="w-4 h-4 text-gray-700" />
               <span class="hidden lg:inline text-sm text-gray-900">{{ item.name }}</span>
@@ -129,13 +136,18 @@ const updateBreadcrumps = (crumps) => {
     </aside>
 
     <!-- Center Content Area -->
-    <div class="flex-1 flex flex-col overflow-hidden border-r border-gray-300">
+    <div class="flex-1 flex flex-col overflow-hidden border-r border-gray-300" v-if="!!currentTeam">
       <!-- Top Bar -->
       <div
         class="flex items-center justify-between bg-[#E4E7DF] px-6 py-3 border-b border-gray-300"
       >
         <!-- Breadcrumb -->
         <div class="flex items-center space-x-2 text-sm text-gray-700 font-medium">
+          <div class="flex items-center space-x-1">
+            <Layers class="w-4 h-4 text-gray-500" />
+            <span>{{ currentTeam.name }}</span>
+            <ChevronRight class="w-4 h-4" />
+          </div>
           <div
             class="flex items-center space-x-1"
             v-for="(crumb, index) in breadcrumps"
@@ -172,8 +184,15 @@ const updateBreadcrumps = (crumps) => {
 
       <!-- Scrollable Content -->
       <div class="flex-1 overflow-auto px-6 py-5 bg-[#F3F4EF]">
-        <RouterView @update-breadcrumps="updateBreadcrumps" />
+        <RouterView
+          @update-breadcrumps="updateBreadcrumps"
+          @activate-tab="(tab) => (selectedTab = tab)"
+        />
       </div>
+    </div>
+
+    <div v-else>
+      <div>Loading ...</div>
     </div>
 
     <!-- Right Mini Sidebar -->
