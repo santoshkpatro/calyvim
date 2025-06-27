@@ -34,6 +34,13 @@ class Team(BaseModel):
     def __str__(self):
         return f"Team ({self.id})"
 
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            if not self.issue_prefix:
+                # Generate a default issue prefix based on the team name
+                self.issue_prefix = self.name[:3].upper()
+        return super().save(*args, **kwargs)
+
 
 class TeamMember(BaseModel):
     class Role(models.TextChoices):

@@ -6,7 +6,6 @@ from calyvim.models.common import BaseModel
 
 class Organization(BaseModel):
     name = models.CharField(max_length=128)
-    domain = models.CharField(max_length=128, unique=True)
     description = models.TextField(blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
@@ -52,6 +51,8 @@ class OrganizationMember(BaseModel):
         "User",
         on_delete=models.PROTECT,
         related_name="invited_members",
+        blank=True,
+        null=True,
     )
 
     class Meta:

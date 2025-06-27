@@ -7,16 +7,22 @@ from calyvim.models.common import BaseModel
 
 class UserManager(models.Manager):
     def create_superuser(self, email, full_name, password=None):
+        today = timezone.now()
         user = self.model(
             email=email,
             full_name=full_name,
             is_admin=True,
-            confirmed_at=timezone.now(),
-            verified_at=timezone.now(),
+            verified_at=today,
+            date_joined=today,
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
+
+
+class ActiveUserManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(date_joined__isnull=False)
 
 
 class User(AbstractBaseUser, BaseModel):
@@ -26,7 +32,6 @@ class User(AbstractBaseUser, BaseModel):
     display_name = models.CharField(max_length=255, blank=True)
     is_2f_enabled = models.BooleanField(default=False)
 
-    confirmed_at = models.DateTimeField(null=True, blank=True)
     verified_at = models.DateTimeField(null=True, blank=True)
     password_expired = models.BooleanField(default=False)
 
@@ -34,11 +39,13 @@ class User(AbstractBaseUser, BaseModel):
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
 
     is_admin = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(blank=True, null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "full_name"]
 
     objects = UserManager()
+    active_objects = ActiveUserManager()
 
     class Meta:
         db_table = "users"
@@ -49,6 +56,14 @@ class User(AbstractBaseUser, BaseModel):
 
     def __str__(self):
         return f"User ({self.email})"
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            if not self.username:
+                self.username = self.generate_username()
+            if not self.display_name:
+                self.display_name = self.full_name or self.username
+        return super().save(*args, **kwargs)
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
