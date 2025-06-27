@@ -1,21 +1,19 @@
 <script setup>
 import {
   LayoutDashboard,
-  Bug,
   Timer,
   FolderKanban,
-  CalendarDays,
   BookOpenText,
   BarChartBig,
   Target,
   Users,
   Settings,
-  Star,
-  LifeBuoy,
   FileText,
-  User,
-  Bell,
-  Search,
+  LifeBuoy,
+  Star,
+  Bug,
+  Activity,
+  CalendarDays,
 } from 'lucide-vue-next'
 
 import { RouterView, useRoute, RouterLink } from 'vue-router'
@@ -37,17 +35,50 @@ const menuItems = [
   { name: 'Team Members', icon: Users, color: 'text-rose-500', routePath: 'team-members' },
   { name: 'Settings', icon: Settings, color: 'text-gray-700', routePath: 'settings' },
 ]
+
+const rightSidebarItems = [
+  {
+    name: 'Docs',
+    icon: FileText,
+    href: 'https://calyvim.com/docs',
+    external: true,
+  },
+  {
+    name: 'Help',
+    icon: LifeBuoy,
+    href: 'https://calyvim.com/docs',
+    external: true,
+  },
+  {
+    name: 'Bug',
+    icon: Bug,
+    href: 'https://github.com/santoshkpatro/calyvim/issues',
+    external: true,
+  },
+  {
+    name: 'Star',
+    icon: Star,
+    href: 'https://github.com/santoshkpatro/calyvim',
+    external: true,
+  },
+  {
+    name: 'Status',
+    icon: Activity,
+    href: 'https://status.calyvim.com',
+    external: true,
+  },
+]
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-[#F3F4EF]">
-    <!-- Sidebar -->
+  <div class="flex h-screen bg-[#F3F4EF] overflow-hidden">
+    <!-- Left Sidebar -->
     <aside
-      class="w-16 sm:w-20 lg:w-64 bg-[#E4E7DF] flex flex-col justify-between py-3 px-1.5 lg:px-3 transition-all"
+      class="w-16 sm:w-20 lg:w-64 bg-[#E4E7DF] flex flex-col justify-between py-3 px-2 lg:px-4 border-r border-gray-300"
     >
       <div>
-        <!-- Team Info -->
-        <div class="mt-2 flex items-center space-x-2 px-2 py-1 rounded-md text-sm text-gray-900">
+        <!-- Team Switcher (no extra top margin) -->
+        <div class="px-2 py-1 text-sm text-gray-900 font-semibold">
           <TeamSwitcher :teamId="route.params.teamId" />
         </div>
 
@@ -58,77 +89,87 @@ const menuItems = [
               :to="`/team/${route.params.teamId}/${item.routePath}`"
               class="flex items-center space-x-2 px-2 py-1 rounded-md cursor-pointer hover:bg-[#D8DBD3] no-underline"
             >
-              <component :is="item.icon" class="w-4 h-4" :class="item.color" />
+              <component :is="item.icon" class="w-4 h-4 text-gray-700" />
               <span class="hidden lg:inline text-sm text-gray-900">{{ item.name }}</span>
             </RouterLink>
           </template>
         </nav>
       </div>
 
-      <!-- Bottom Section -->
-      <div class="flex flex-col space-y-2 mt-4">
-        <div
-          class="flex items-center space-x-2 px-2 py-1 rounded-md cursor-pointer hover:bg-[#D8DBD3]"
-        >
-          <Star class="w-4 h-4 text-yellow-500" />
-          <span class="hidden lg:inline text-sm text-gray-900">Star us on GitHub</span>
-        </div>
-
-        <div
-          class="flex items-center space-x-2 px-2 py-1 rounded-md cursor-pointer hover:bg-[#D8DBD3]"
-        >
-          <LifeBuoy class="w-4 h-4 text-sky-600" />
-          <span class="hidden lg:inline text-sm text-gray-900">Help & Support</span>
-        </div>
-
-        <div
-          class="flex items-center space-x-2 px-2 py-1 rounded-md cursor-pointer hover:bg-[#D8DBD3]"
-        >
-          <FileText class="w-4 h-4 text-indigo-600" />
-          <span class="hidden lg:inline text-sm text-gray-900">Docs</span>
-        </div>
-
-        <!-- Profile -->
-        <div class="flex items-center gap-2 px-2 py-1 mt-2">
-          <User class="w-5 h-5 text-gray-800" />
-          <!-- <img src="/dummy-avatar.png" class="w-6 h-6 rounded-full" /> -->
-          <span class="hidden lg:inline text-sm font-medium text-gray-900">Santosh</span>
-        </div>
+      <!-- Organization Info -->
+      <div class="px-2 py-1 mt-4 text-xs text-gray-800 border-t border-gray-300 pt-3">
+        Organization: Acme Inc.
       </div>
     </aside>
 
-    <!-- Main Content Area with Top Bar -->
-    <div class="flex-1 flex flex-col">
+    <!-- Center Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden border-r border-gray-300">
       <!-- Top Bar -->
       <div
         class="flex items-center justify-between bg-[#E4E7DF] px-6 py-3 border-b border-gray-300"
       >
-        <!-- Breadcrumb / Title -->
-        <div class="text-sm text-gray-700 font-medium">
-          Dashboard / <span class="text-gray-900">Current Page</span>
+        <!-- Breadcrumb -->
+        <div class="flex items-center space-x-2 text-sm text-gray-700 font-medium">
+          <LayoutDashboard class="w-4 h-4 text-gray-500" />
+          <span>Dashboard</span>
+          <span>/</span>
+          <span class="text-gray-900">Current Page</span>
         </div>
 
-        <!-- Right Controls -->
+        <!-- Search and Profile -->
         <div class="flex items-center space-x-4">
-          <!-- Search -->
-          <div class="cursor-pointer p-2 rounded hover:bg-[#D8DBD3]">
-            <Search class="w-5 h-5 text-gray-700" />
-          </div>
+          <a-input-search placeholder="Search" class="!w-48 !rounded !bg-[#E4E7DF]" allow-clear />
 
-          <!-- Notifications -->
-          <div class="cursor-pointer p-2 rounded hover:bg-[#D8DBD3]">
-            <Bell class="w-5 h-5 text-gray-700" />
+          <div class="flex items-center space-x-2">
+            <div
+              class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-800 font-semibold"
+            >
+              S
+            </div>
+            <div
+              class="hidden lg:block leading-tight text-xs text-right"
+              v-if="appStore.isLoggedIn"
+            >
+              <div class="text-gray-900 font-medium">{{ appStore.user.displayName }}</div>
+              <div class="text-gray-600">{{ appStore.user.email }}</div>
+            </div>
           </div>
-
-          <!-- CalyAI Button -->
-          <a-button>Caly AI</a-button>
         </div>
       </div>
 
-      <!-- Main Content -->
-      <div class="flex-1 px-6 py-5 bg-[#F3F4EF]">
+      <!-- Scrollable Content -->
+      <div class="flex-1 overflow-auto px-6 py-5 bg-[#F3F4EF]">
         <RouterView />
       </div>
     </div>
+
+    <!-- Right Mini Sidebar -->
+    <aside class="w-12 bg-[#E4E7DF] border-l border-gray-300 flex flex-col items-center py-4">
+      <div class="flex flex-col items-center space-y-8 flex-1 justify-center">
+        <template v-for="item in rightSidebarItems" :key="item.name">
+          <a
+            :href="item.href"
+            :target="item.external ? '_blank' : '_self'"
+            :rel="item.external ? 'noopener noreferrer' : ''"
+            class="group flex flex-col items-center cursor-pointer hover:bg-[#D8DBD3] p-2 rounded-md transition-colors duration-200 no-underline"
+            :title="item.name"
+          >
+            <!-- Rotated Icon -->
+            <component
+              :is="item.icon"
+              class="w-4 h-4 text-gray-600 group-hover:text-gray-800 mb-2 transform rotate-90"
+            />
+
+            <!-- Rotated Text -->
+            <span
+              class="text-xs text-gray-600 group-hover:text-gray-800 font-medium tracking-wider"
+              style="writing-mode: vertical-rl; text-orientation: mixed"
+            >
+              {{ item.name }}
+            </span>
+          </a>
+        </template>
+      </div>
+    </aside>
   </div>
 </template>
