@@ -97,3 +97,18 @@ class AccountViewSet(ViewSet):
 
         response_data["detail"] = "Registration successful"
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+    # GET: /api/accounts/me
+    @action(detail=False, methods=["get"], url_path="me")
+    def me(self, request, *args, **kwargs):
+        response_data = api_response_template()
+        user = request.user
+
+        if not user.is_authenticated:
+            response_data["detail"] = "User not authenticated"
+            response_data["error"] = "not_authenticated"
+            return Response(response_data, status=status.HTTP_401_UNAUTHORIZED)
+
+        logged_in_user_serializer = LoggedInUserSerializer(user)
+        response_data["result"] = logged_in_user_serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)
