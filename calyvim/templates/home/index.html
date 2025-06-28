@@ -1,7 +1,30 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'calyvim/css/index.css' %}">
+{% endblock styles %}
 
 {% block main %}
-<div>
-    Hey, welcome to Calyvim!.
+<div class="row d-flex align-items-center justify-content-center" id="main-content">
+    <div class="col-12 col-md-8 col-lg-6 text-center">
+        <h1 class="display-3 fw-bold brand-gradient mb-3">Calyvim</h1>
+        <p class="lead text-muted mb-5">The simple yet powerful task management platform for modern teams. Built for
+            clarity, collaboration, and getting things done.</p>
+
+        <h2 class="h3 fw-bold mb-4">Launching Soon!</h2>
+
+        <div class="d-grid gap-2 d-md-block mb-4">
+            <button class="btn btn-primary btn-lg px-5" type="button">Request Early Access</button>
+        </div>
+
+        <p class="mt-4">
+            <a href="/accounts/login/" class="link-secondary">Dashboard</a>
+        </p>
+    </div>
 </div>
 {% endblock main %}
+
+{% block script %}
+<script src="{% static 'calyvim/js/index.js' %}"></script>
+{% endblock script %}
