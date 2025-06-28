@@ -20,9 +20,10 @@ import {
 import { ref, computed, onMounted, watch } from 'vue'
 import { RouterView, useRoute, RouterLink } from 'vue-router'
 
-import { getTeamDetailsAPI } from '@/api'
+import { getTeamDetailsAPI, getOrganizationsAPI } from '@/api'
 import { useAppStore } from '@/stores/app'
 import TeamSwitcher from '@/components/TeamSwitcher.vue'
+import OrganizationSwitcher from '@/components/OrganizationSwitcher.vue'
 import { teamAvatar } from '@/utils/images'
 
 const route = useRoute()
@@ -131,8 +132,11 @@ watch(() => route.params.teamId, loadTeamDetails, { immediate: true })
       </div>
 
       <!-- Organization Info -->
-      <div class="px-2 py-1 mt-4 text-xs text-gray-800 border-t border-gray-300 pt-3">
-        Organization: Acme Inc.
+      <div
+        class="py-1 mt-4 text-xs text-gray-800 border-t border-gray-300 pt-3"
+        v-if="!!currentTeam"
+      >
+        <OrganizationSwitcher :teamOrganizationId="currentTeam?.organizationId" />
       </div>
     </aside>
 

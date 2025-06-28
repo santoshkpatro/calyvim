@@ -49,7 +49,7 @@ function createNewTeam() {
   <a-dropdown v-model:open="visible" trigger="click">
     <!-- Trigger -->
     <a
-      class="ant-dropdown-link flex items-center space-x-1 !text-gray-900 hover:!text-black hover:!bg-[#D6D9D1] px-1.5 py-1 rounded-md transition-colors"
+      class="ant-dropdown-link flex items-center space-x-1 !text-gray-900 hover:!text-black hover:!bg-[#D6D9D1] px-1.5 py-1 rounded-md select-none"
       @click.prevent
     >
       <div class="flex flex-col items-start">

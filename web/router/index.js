@@ -6,7 +6,7 @@ import IndexView from '@/views/IndexView.vue'
 import { useAppStore } from '@/stores/app'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory('/app'),
   routes: [
     {
       path: '/',
