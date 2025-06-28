@@ -17,17 +17,12 @@ const router = createRouter({
       },
     },
     {
-      path: '/about',
-      name: 'about',
+      path: '/health',
+      name: 'health',
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('@/views/AboutView.vue'),
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginView.vue'),
+      component: () => import('@/views/HealthView.vue'),
     },
     {
       path: '/team/:teamId',
@@ -57,7 +52,7 @@ router.beforeEach((to, from, next) => {
     // this route requires auth, check if logged in
     if (!appStore.isLoggedIn) {
       // not logged in, redirect to login page.
-      next({ name: 'login' })
+      window.location.href = '/accounts/login/?redirect=' + encodeURIComponent(to.fullPath)
     } else {
       // logged in, proceed to route
       next()

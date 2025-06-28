@@ -38,6 +38,8 @@ djangorestframework==3.16.0
     # via calyvim (pyproject.toml)
 executing==2.2.0
     # via icecream
+gunicorn==23.0.0
+    # via calyvim (pyproject.toml)
 h11==0.16.0
     # via httpcore
 httpcore==1.0.9
@@ -55,7 +57,9 @@ kombu==5.5.4
 more-itertools==10.7.0
     # via calyvim (pyproject.toml)
 packaging==25.0
-    # via kombu
+    # via
+    #   gunicorn
+    #   kombu
 prompt-toolkit==3.0.51
     # via click-repl
 psycopg==3.2.9
@@ -64,6 +68,8 @@ pygments==2.19.2
     # via icecream
 python-dateutil==2.9.0.post0
     # via celery
+python-dotenv==1.1.1
+    # via calyvim (pyproject.toml)
 redis==6.2.0
     # via calyvim (pyproject.toml)
 six==1.17.0
@@ -85,3 +91,5 @@ vine==5.1.0
     #   kombu
 wcwidth==0.2.13
     # via prompt-toolkit
+whitenoise==6.9.0
+    # via calyvim (pyproject.toml)

@@ -24,13 +24,13 @@ export default defineConfig({
   root: '',
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./web', import.meta.url)),
+      '@': fileURLToPath(new URL('./app', import.meta.url)),
     },
   },
   server: {
     port: 3000,
   },
   build: {
-    assetsDir: 'static',
+    assetsDir: 'static/app',
   },
 })

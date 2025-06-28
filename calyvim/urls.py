@@ -2,7 +2,9 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework.routers import SimpleRouter
 
-from calyvim.views import index
+from calyvim.views.index import AppView
+from calyvim.views.accounts import LoginView
+
 from calyvim.api.accounts.views import AccountViewSet
 from calyvim.api.teams.views import TeamViewSet
 from calyvim.api.organizations.views import OrganizationViewSet
@@ -17,5 +19,6 @@ api_router.register("organizations", OrganizationViewSet, basename="organization
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(api_router.urls)),
-    re_path(r"^app/(?:.*)/?$", index, name="index"),  # Catch all routes starting with app/
+    path("accounts/login/", LoginView.as_view(), name="login"),
+    re_path(r"^app/(?:.*)/?$", AppView.as_view(), name="app"),  # Catch all routes starting with app/
 ]
