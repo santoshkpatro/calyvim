@@ -13,12 +13,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
+import sentry_sdk
 
 load_dotenv()  # take environment variables
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -75,11 +76,32 @@ WSGI_APPLICATION = "calyvim.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+USE_DATABASE_URL = os.environ.get("DATABASE_URL", "0") == "1"
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DB_NAME", "calyvim"),
+        "USER": os.environ.get("DB_USER", "calyvim"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "calyvim"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
+    }
+}
+if USE_DATABASE_URL:
+    DATABASES["default"] = dj_database_url.config(
+        default=os.environ.get(
+            "DATABASE_URL", "postgresql://calyvim:calyvim@localhost:5432/calyvim"
+        ),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+
+# Cache Configuration (#REDIS)
+# https://docs.djangoproject.com/en/5.2/topics/cache/#redis
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://localhost:6379/1"),
     }
 }
 
@@ -140,3 +162,20 @@ REST_FRAMEWORK = {
         "calyvim.utils.response.CamelCaseJSONParser",
     ],
 }
+
+# Sentry configuration
+USE_SENTRY = os.environ.get("USE_SENTRY", "0") == "1"
+if USE_SENTRY:
+    sentry_sdk.init(
+        dsn=os.environ.get("SENTRY_DSN"),
+        send_default_pii=True,
+    )
+
+# SCOUT configuration
+USE_SCOUT = os.environ.get("USE_SCOUT", "0") == "1"
+SCOUT_MONITOR = True
+SCOUT_KEY = os.environ.get("SCOUT_KEY", "")
+SCOUT_NAME = os.environ.get("SCOUT_NAME", "calyvim")
+if USE_SCOUT:
+    # Insert Scout APM at the beginning of INSTALLED_APPS
+    INSTALLED_APPS.insert(0, "scout_apm.django")
