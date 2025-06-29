@@ -76,17 +76,13 @@ WSGI_APPLICATION = "calyvim.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-USE_DATABASE_URL = os.environ.get("DATABASE_URL", "0") == "1"
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", "calyvim"),
-        "USER": os.environ.get("DB_USER", "calyvim"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "calyvim"),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+USE_DATABASE_URL = os.environ.get("DATABASE_URL", "0") == "1"
 if USE_DATABASE_URL:
     DATABASES["default"] = dj_database_url.config(
         default=os.environ.get(
@@ -95,6 +91,17 @@ if USE_DATABASE_URL:
         conn_max_age=600,
         conn_health_checks=True,
     )
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME", "calyvim"),
+            "USER": os.environ.get("DB_USER", "calyvim"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", "calyvim"),
+            "HOST": os.environ.get("DB_HOST", "localhost"),
+            "PORT": os.environ.get("DB_PORT", "5432"),
+        }
+    }
 
 # Cache Configuration (#REDIS)
 # https://docs.djangoproject.com/en/5.2/topics/cache/#redis
